@@ -1,5 +1,10 @@
 package MyLib;
-
+/*
+  Sprite繪圖器 ver 1.0
+  作者:NULL(w100386435)
+  個人小屋:http://home.gamer.com.tw/homeindex.php?owner=w100386435
+  轉載請保留此標籤
+*/
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Mesh;

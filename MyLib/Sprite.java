@@ -1,7 +1,9 @@
 package MyLib;
 /*
-  2D 圖像精靈
-
+  2D 圖像精靈 ver 1.0
+  作者:NULL(w100386435)
+  個人小屋:http://home.gamer.com.tw/homeindex.php?owner=w100386435
+  轉載請保留此標籤
 */
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
