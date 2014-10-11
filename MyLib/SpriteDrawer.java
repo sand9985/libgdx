@@ -1,4 +1,13 @@
 package MyLib;
+/*
+#===================================
+#
+#  SpriteDrawer ver 1.0
+#  作者:sand9985
+#  轉載請保留此標籤
+#==================================== 
+ */
+
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
@@ -26,7 +35,7 @@ public class SpriteDrawer {
 	private ShaderProgram shader; // 著色器
 	private boolean ownsShader; // 是否擁有shader
 	
-	public int maxSpritesInBatch = 0;
+
 
 	public SpriteDrawer() {
 		this(1000, null);
@@ -47,7 +56,17 @@ public class SpriteDrawer {
 						Usage.ColorPacked, 4, ShaderProgram.COLOR_ATTRIBUTE),
 				new VertexAttribute(Usage.TextureCoordinates, 2,
 						ShaderProgram.TEXCOORD_ATTRIBUTE + "0"),
-				new VertexAttribute(Usage.Generic, 1, "a_alpha"));
+				new VertexAttribute(Usage.Generic, 1, "a_alpha"),
+				new VertexAttribute(
+						Usage.Generic, 1, "a_tone_red"),
+				new VertexAttribute(
+					Usage.Generic, 1, "a_tone_green"),
+				new VertexAttribute(
+					Usage.Generic, 1, "a_tone_blue"),
+				new VertexAttribute(
+					Usage.Generic, 1, "a_tone_gray")	
+		   
+				);
 
 		projectionMatrix.setToOrtho2D(0, 0, Gdx.graphics.getWidth(),
 				Gdx.graphics.getHeight());
@@ -81,12 +100,24 @@ public class SpriteDrawer {
 				+ "attribute vec4 " + ShaderProgram.COLOR_ATTRIBUTE + ";\n" //
 				+ "attribute vec2 " + ShaderProgram.TEXCOORD_ATTRIBUTE + "0;\n" //
 				+ "attribute float a_alpha;\n"
+				+ "attribute float a_tone_red;\n"
+				+ "attribute float a_tone_green;\n"
+				+ "attribute float a_tone_blue;\n"
+				+ "attribute float a_tone_gray;\n"
 				+ "uniform mat4 u_projTrans;\n" //
 				+ "varying vec4 v_color;\n" //
 				+ "varying vec2 v_texCoords;\n"
 				+ "varying float v_alpha;\n"
+				+ "varying float v_tone_red;\n"
+				+ "varying float v_tone_green;\n"
+				+ "varying float v_tone_blue;\n"
+				+ "varying float v_tone_gray;\n"
 				+ "void main()\n" //
 				+ "{\n" //
+				+ "   v_tone_red=a_tone_red; \n"
+				+ "   v_tone_green=a_tone_green; \n"
+				+ "   v_tone_blue=a_tone_blue; \n"
+				+ "   v_tone_gray=a_tone_gray; \n"
 				+ "   v_alpha=a_alpha;\n"
 				+ "   v_color = " + ShaderProgram.COLOR_ATTRIBUTE + ";\n" //
 				+ "   v_color.a = v_color.a * (256.0/255.0);\n" //
@@ -102,7 +133,11 @@ public class SpriteDrawer {
 				+ "varying LOWP vec4 v_color;\n" //
 				+ "varying vec2 v_texCoords;\n" //
 				+ "varying float v_alpha;\n"
-				+ "uniform sampler2D u_texture;\n" // 
+				+ "varying float v_tone_red;\n"
+				+ "varying float v_tone_green;\n"
+				+ "varying float v_tone_blue;\n"
+				+ "varying float v_tone_gray;\n"
+				+ "uniform sampler2D u_texture;\n" //		
 				+ "vec4 alpha_blend(vec4 c1,vec4 c2){\n"
 				+"  float a1=c1.a;\n"
 				+"  float a2=c2.a;\n"
@@ -113,9 +148,20 @@ public class SpriteDrawer {
 				+"  color.a= a1+a2*(1.0 - a1);\n"
 				+"   return color;\n"
 				+"  }\n"
+				+" vec4 tone_blend(vec4 v){\n"
+				+ " float gray = dot(v.rgb, vec3(0.299, 0.587, 0.114));\n"
+				+ " float percent=(v_tone_gray-1.0)\n;"
+				+ "  v.r=gray+(gray-v.r)*percent;\n"
+				+ "  v.g=gray+(gray-v.g)*percent;\n"
+				+ "  v.b=gray+(gray-v.b)*percent;\n"
+				+ "  v.r+=v_tone_red;\n"
+				+ "  v.g+=v_tone_green;\n"
+				+ "  v.b+=v_tone_blue;\n"
+				+"  return v;}\n"
 				+ "void main()\n"//
 				+ "{\n" //
 				+ "  vec4 t_color=texture2D(u_texture, v_texCoords);\n"
+				+ "  t_color=tone_blend(t_color);"
 				+ "  if(t_color.a>0.0)\n"
 				+ "  gl_FragColor = alpha_blend(v_color,t_color); \n" 
 				+ "  else\n"
@@ -159,6 +205,7 @@ public class SpriteDrawer {
 	// 繪製Sprite
 	public void draw(Sprite sprite) {
 
+		if(sprite.visible==false)return; //如果不可見
 		if (!drawing)
 			throw new IllegalStateException(
 					"SpriteDrawer.begin must be called before draw.");
@@ -276,7 +323,7 @@ public class SpriteDrawer {
 		y4 += worldOriginY;
 
 		float color = sprite.color.toFloatBits();
-
+   
 		int idx = this.idx;
 		vertices[idx++] = x1;
 		vertices[idx++] = y1;
@@ -284,28 +331,44 @@ public class SpriteDrawer {
 		vertices[idx++] = u;
 		vertices[idx++] = v;
 		vertices[idx++] = sprite.alpha;
-
+		vertices[idx++] = sprite.tone.r;
+		vertices[idx++] = sprite.tone.g;
+		vertices[idx++] = sprite.tone.b;
+		vertices[idx++] = sprite.tone.gray;
+		
+		
 		vertices[idx++] = x2;
 		vertices[idx++] = y2;
 		vertices[idx++] = color;
 		vertices[idx++] = u;
 		vertices[idx++] = v2;
 		vertices[idx++] = sprite.alpha;
-
+		vertices[idx++] = sprite.tone.r;
+		vertices[idx++] = sprite.tone.g;
+		vertices[idx++] = sprite.tone.b;
+		vertices[idx++] = sprite.tone.gray;
+		
 		vertices[idx++] = x3;
 		vertices[idx++] = y3;
 		vertices[idx++] = color;
 		vertices[idx++] = u2;
 		vertices[idx++] = v2;
 		vertices[idx++] = sprite.alpha;
-
+		vertices[idx++] = sprite.tone.r;
+		vertices[idx++] = sprite.tone.g;
+		vertices[idx++] = sprite.tone.b;
+		vertices[idx++] = sprite.tone.gray;
+		
 		vertices[idx++] = x4;
 		vertices[idx++] = y4;
 		vertices[idx++] = color;
 		vertices[idx++] = u2;
 		vertices[idx++] = v;
 		vertices[idx++] = sprite.alpha;
-
+		vertices[idx++] = sprite.tone.r;
+		vertices[idx++] = sprite.tone.g;
+		vertices[idx++] = sprite.tone.b;
+		vertices[idx++] = sprite.tone.gray;
 		this.idx = idx;
 
 	}
@@ -316,8 +379,7 @@ public class SpriteDrawer {
 			return;
 
 		int spritesInBatch = idx / 20;
-		if (spritesInBatch > maxSpritesInBatch)
-			maxSpritesInBatch = spritesInBatch;
+	
 		int count = spritesInBatch * 6;
 
 		lastTexture.bind();
