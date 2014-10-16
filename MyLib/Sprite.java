@@ -2,7 +2,7 @@ package MyLib;
 /*
 #===================================
 #
-#  Sprite ver 1.0
+#  2D Sprite ver 1.0
 #  作者:sand9985
 #  轉載請保留此標籤
 #==================================== 
@@ -37,13 +37,8 @@ public class Sprite {
  public boolean visible; //是否可見
  
  
- public Sprite(){
+ public Sprite(){	
 	 
-	 init();//初使化
-	 
- }
- //初使化
- private void init(){
 	 this.x=0;
 	 this.y=0;
 	 this.scale_x=1;
@@ -60,8 +55,9 @@ public class Sprite {
 	 this.texture=null;
 	 this.blend_mode=0; 
 	 this.visible=true;
+	 
+	 
  }
-
  
 
  

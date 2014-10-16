@@ -2,7 +2,7 @@ package MyLib;
 /*
 #===================================
 #
-#  SpriteDrawer ver 1.0
+#  Drawer ver 1.0
 #  作者:sand9985
 #  轉載請保留此標籤
 #==================================== 
@@ -20,7 +20,7 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix4;
 
-public class SpriteDrawer {
+public class Drawer {
 	private Mesh mesh; // 貼圖用網格
 
 	private final float[] vertices;
@@ -37,15 +37,15 @@ public class SpriteDrawer {
 	
 
 
-	public SpriteDrawer() {
+	public Drawer() {
 		this(1000, null);
 	}
 
-	public SpriteDrawer(int size) {
+	public Drawer(int size) {
 		this(size, null);
 	}
 
-	public SpriteDrawer(int size, ShaderProgram defaultShader) {
+	public Drawer(int size, ShaderProgram defaultShader) {
 		if (size > 5460)
 			throw new IllegalArgumentException(
 					"Can't have more than 5460 sprites per batch: " + size);
@@ -58,7 +58,7 @@ public class SpriteDrawer {
 						ShaderProgram.TEXCOORD_ATTRIBUTE + "0"),
 				new VertexAttribute(Usage.Generic, 1, "a_alpha"),
 				new VertexAttribute(
-						Usage.Generic, 1, "a_tone_red"),
+						Usage.Generic, 1,"a_tone_red"),
 				new VertexAttribute(
 					Usage.Generic, 1, "a_tone_green"),
 				new VertexAttribute(
@@ -67,10 +67,10 @@ public class SpriteDrawer {
 					Usage.Generic, 1, "a_tone_gray")	
 		   
 				);
-
+	
 		projectionMatrix.setToOrtho2D(0, 0, Gdx.graphics.getWidth(),
 				Gdx.graphics.getHeight());
-
+		
 		vertices = new float[size * Sprite.SPRITE_SIZE];
  
 		int len = size * 6;
@@ -104,7 +104,8 @@ public class SpriteDrawer {
 				+ "attribute float a_tone_green;\n"
 				+ "attribute float a_tone_blue;\n"
 				+ "attribute float a_tone_gray;\n"
-				+ "uniform mat4 u_projTrans;\n" //
+				+ "uniform mat4 u_projTrans;\n"
+			    + "uniform int u_type;\n"
 				+ "varying vec4 v_color;\n" //
 				+ "varying vec2 v_texCoords;\n"
 				+ "varying float v_alpha;\n"
@@ -120,7 +121,6 @@ public class SpriteDrawer {
 				+ "   v_tone_gray=a_tone_gray; \n"
 				+ "   v_alpha=a_alpha;\n"
 				+ "   v_color = " + ShaderProgram.COLOR_ATTRIBUTE + ";\n" //
-				+ "   v_color.a = v_color.a * (256.0/255.0);\n" //
 				+ "   v_texCoords = " + ShaderProgram.TEXCOORD_ATTRIBUTE + "0;\n" //
 				+ "   gl_Position =  u_projTrans * " + ShaderProgram.POSITION_ATTRIBUTE + ";\n" //
 				+ "}\n";
@@ -158,15 +158,19 @@ public class SpriteDrawer {
 				+ "  v.g+=v_tone_green;\n"
 				+ "  v.b+=v_tone_blue;\n"
 				+"  return v;}\n"
+				+" void sprite_shader(){\n"
+				+ "  vec4 t_color=texture2D(u_texture, v_texCoords);\n"
+				+ "  if(t_color.a>0.0){\n"
+				+ "   t_color=tone_blend(t_color);\n"
+				+ "  gl_FragColor = alpha_blend(v_color,t_color); \n"
+				+ "   }"
+				+ "  else{\n"
+				+ "  gl_FragColor=t_color;}\n"
+				+ "  gl_FragColor.a=gl_FragColor.a*v_alpha;\n"
+				+" }\n"
 				+ "void main()\n"//
 				+ "{\n" //
-				+ "  vec4 t_color=texture2D(u_texture, v_texCoords);\n"
-				+ "  t_color=tone_blend(t_color);"
-				+ "  if(t_color.a>0.0)\n"
-				+ "  gl_FragColor = alpha_blend(v_color,t_color); \n" 
-				+ "  else\n"
-				+ "  gl_FragColor=t_color;\n"
-				+ "  gl_FragColor.a=gl_FragColor.a*v_alpha;\n"
+                + "sprite_shader();\n"
 				+ "}";
 		ShaderProgram shader = new ShaderProgram(vertexShader, fragmentShader);
 		if (shader.isCompiled() == false)
@@ -179,7 +183,7 @@ public class SpriteDrawer {
 	public void begin() {
 		if (drawing)
 			throw new IllegalStateException(
-					"SpriteDrawer.end must be called before begin.");
+					"Drawer.end must be called before begin.");
 		Gdx.gl.glDepthMask(false);
 		shader.begin();
 		setupMatrices(); // 設定矩陣
@@ -191,7 +195,7 @@ public class SpriteDrawer {
 	public void end() {
 		if (!drawing)
 			throw new IllegalStateException(
-					"SpriteDrawer.begin must be called before end.");
+					"Drawer.begin must be called before end.");
 		if (idx > 0)
 			flush();
 		lastTexture = null;
@@ -205,13 +209,15 @@ public class SpriteDrawer {
 	// 繪製Sprite
 	public void draw(Sprite sprite) {
 
-		if(sprite.visible==false)return; //如果不可見
+	    if(sprite.texture==null)return;
+		if(!sprite.visible)return; //如果不可見
 		if (!drawing)
 			throw new IllegalStateException(
-					"SpriteDrawer.begin must be called before draw.");
+					"Drawer.begin must be called before draw.");
 
 		float[] vertices = this.vertices;
 
+		
 		if (sprite.texture != lastTexture)
 			switchTexture(sprite.texture);
 		else if (idx == vertices.length)
@@ -373,12 +379,13 @@ public class SpriteDrawer {
 
 	}
 
+	
 	// 刷新
 	public void flush() {
 		if (idx == 0)
 			return;
 
-		int spritesInBatch = idx / 20;
+		int spritesInBatch = idx / 40;
 	
 		int count = spritesInBatch * 6;
 
@@ -405,7 +412,7 @@ public class SpriteDrawer {
 		idx = 0;
 	}
 
-	// 設定混色
+
 
 	// 釋放
 	public void dispose() {
