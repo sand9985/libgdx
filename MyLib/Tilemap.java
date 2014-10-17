@@ -8,31 +8,30 @@ package MyLib;
 #==================================== 
  */
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.MapLayer;
-import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
-import com.badlogic.gdx.maps.tiled.TiledMapRenderer;
 import com.badlogic.gdx.maps.tiled.TiledMapTile;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
-import com.badlogic.gdx.maps.tiled.tiles.AnimatedTiledMapTile;
-import com.badlogic.gdx.math.Rectangle;
+
+
 
 public class Tilemap   {
 
     public static Drawer drawer=null; //指標
+	public static int view_width;  //視窗寬度
+	public static int view_height; //視窗高度
+	
 	private TiledMap map; //地圖
 	private TmxMapLoader loader; //讀取器
     private Integer width; //地圖寬度
     private Integer height; //地圖高度
     private Integer tilewidth; //地圖格子寬
     private Integer tileheight; //地圖格子寬
-	private int view_width;  //視窗寬度
-	private int view_height; //視窗高度
-    private Sprite temp;
+    private Sprite temp; //繪圖用
     
+    public  boolean visible; //是否可見 
 	public  float ox; //偏移x
     public  float oy; //偏移y
     public  Tone  tone; //色調   
@@ -44,15 +43,22 @@ public class Tilemap   {
 		temp=new Sprite();
 		loader=new TmxMapLoader();
 		//取得視窗大小
-		this.view_width=Gdx.graphics.getWidth();
-		this.view_height=Gdx.graphics.getHeight();
+		
 		this.ox=0;
 		this.oy=0;
 		this.tone=new Tone();
 		this.scale_x=1;
 		this.scale_y=1;
+		this.visible=true;
 		
 	}
+ 	//取得layer
+ 	public TiledMapTileLayer get_layer(String name){
+ 		
+ 	TiledMapTileLayer layer = (TiledMapTileLayer)map.getLayers().get(name);
+ 		
+ 	return layer;
+ 	}
 	//讀取地圖 (tmx格式)
 	public void load(String file_name){
 		
@@ -76,7 +82,8 @@ public class Tilemap   {
 	//繪製地圖
 	public void render () {
 		
-		AnimatedTiledMapTile.updateAnimationBaseTime();
+	
+		
 		temp.tone=tone;
 		for (MapLayer layer : map.getLayers()) {
 			if (layer.isVisible()) {
@@ -89,7 +96,7 @@ public class Tilemap   {
 	}
 	
     
-	
+	 //繪製圖層
 	private void renderTileLayer (TiledMapTileLayer layer) {
 		
 	
@@ -97,11 +104,11 @@ public class Tilemap   {
 		final float layerTileHeight = tileheight *this.scale_y;
 		
 		//減少不用畫的範圍
-		final int col1 = Math.max(0, (int)(this.ox / layerTileWidth));
-		final int col2 = Math.min(width, (int)(( this.ox+view_width + layerTileWidth) / layerTileWidth));
-		final int row1 = Math.max(0, (int)(this.oy / layerTileWidth));
-		final int row2 = Math.min(height, (int)((this.oy+ view_height + layerTileHeight) / layerTileHeight));
-		
+		final int col1 = Math.max(0, (int)(-this.ox / layerTileWidth));
+		final int col2 = Math.min(width, (int)(( -this.ox+view_width + layerTileWidth) / layerTileWidth));
+		final int row1 = Math.max(0, (int)(-this.oy / layerTileWidth));
+		final int row2 = Math.min(height, (int)((-this.oy+ view_height + layerTileHeight) / layerTileHeight));
+	
 		float xStart = col1 * layerTileWidth;
 		float y = row2 * layerTileHeight;
 		
@@ -124,9 +131,9 @@ public class Tilemap   {
               
 				TextureRegion region = tile.getTextureRegion();
 
-				temp.x= x + tile.getOffsetX() * this.scale_x-ox*scale_x;
-				temp.y= y + tile.getOffsetY() * this.scale_y-oy*scale_y;
-			
+				temp.x= x + tile.getOffsetX() * this.scale_x+ox*scale_x;
+				temp.y= y + tile.getOffsetY() * this.scale_y+oy*scale_y;
+
 				temp.rect.x=region.getRegionX();
 				temp.rect.height=region.getRegionHeight();
 				temp.rect.width=region.getRegionWidth();
@@ -135,8 +142,7 @@ public class Tilemap   {
 				temp.scale_x=this.scale_x;
 				temp.scale_y=this.scale_y;
 				temp.texture=region.getTexture();
-				
-				
+								
 				drawer.draw(temp);
 				
 				x += layerTileWidth;
@@ -144,7 +150,7 @@ public class Tilemap   {
 			y -= layerTileHeight;
 		}
 		
-		
+
 		
 		
 	}

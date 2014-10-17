@@ -34,9 +34,8 @@ public class Drawer {
 	private int blend_mode = 0; // sprie的混色模式
 	private ShaderProgram shader; // 著色器
 	private boolean ownsShader; // 是否擁有shader
+
 	
-
-
 	public Drawer() {
 		this(1000, null);
 	}
@@ -71,6 +70,7 @@ public class Drawer {
 		projectionMatrix.setToOrtho2D(0, 0, Gdx.graphics.getWidth(),
 				Gdx.graphics.getHeight());
 		
+	
 		vertices = new float[size * Sprite.SPRITE_SIZE];
  
 		int len = size * 6;
@@ -420,7 +420,7 @@ public class Drawer {
 		if (ownsShader && shader != null)
 			shader.dispose();
 	}
-
+    
 	// 安裝矩陣
 	private void setupMatrices() {
 		combinedMatrix.set(projectionMatrix).mul(transformMatrix);
