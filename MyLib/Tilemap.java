@@ -133,7 +133,7 @@ public class Tilemap   {
 
 				temp.x= x + tile.getOffsetX() * this.scale_x+ox*scale_x;
 				temp.y= y + tile.getOffsetY() * this.scale_y+oy*scale_y;
-
+               
 				temp.rect.x=region.getRegionX();
 				temp.rect.height=region.getRegionHeight();
 				temp.rect.width=region.getRegionWidth();

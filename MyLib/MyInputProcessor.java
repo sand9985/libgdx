@@ -27,15 +27,14 @@ public class MyInputProcessor extends InputAdapter {
 	public boolean touchDragged(int x, int y, int pointer) {
 		Input.mouse_x=x;
 		Input.mouse_y=y;
-		Input.down = true;
-	
+		
 		return true;
 	}
 	
 	public boolean touchDown(int x, int y, int pointer, int button) {
 		Input.mouse_x=x;
 		Input.mouse_y=y;
-		Input.down = true;
+		
 		
 		return true;
 	}
@@ -43,7 +42,7 @@ public class MyInputProcessor extends InputAdapter {
 	public boolean touchUp(int x, int y, int pointer, int button) {
 		Input.mouse_x=x;
 		Input.mouse_y=y;
-		Input.down = false;
+		
 		return true;
 	}
 	

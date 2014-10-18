@@ -19,7 +19,7 @@ import com.badlogic.gdx.math.Vector2;
 public class Box2DHelper {
 
 	public static World p_world = null; // 指定哪一個world
-	public static final float PPM = 100; //一公尺
+	public static final float PPM = 100; //每100 pixel 一公尺
 	
 	// 設定圖層碰撞範圍
 	public static void set_bound_box(Tilemap map, String layer_name) {
@@ -37,7 +37,6 @@ public class Box2DHelper {
 		for (int row = 0; row < layer.getHeight(); row++) {
 			for (int col = 0; col < layer.getWidth(); col++) {
 				Cell cell = layer.getCell(col, row);
-
 				if (cell == null)
 					continue;
 				if (cell.getTile() == null)

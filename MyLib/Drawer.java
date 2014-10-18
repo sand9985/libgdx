@@ -441,4 +441,10 @@ public class Drawer {
 	public boolean isDrawing() {
 		return drawing;
 	}
+	//³]©w¯x°}
+	public void set_project(Matrix4 proj){
+	
+	 this.projectionMatrix.set(proj);
+	
+	}
 }
