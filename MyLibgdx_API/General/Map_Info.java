@@ -7,17 +7,31 @@ import com.badlogic.gdx.physics.box2d.Body;
 import Box2D.Box2D_Setting;
 public class Map_Info {
 
-	public static final float Window_width=Gdx.graphics.getWidth()/Box2D_Setting.PPM;;
-	public static final float Window_height=Gdx.graphics.getHeight()/Box2D_Setting.PPM;
+	public static float Window_width=Gdx.graphics.getWidth()/Box2D_Setting.PPM;;
+	public static float Window_height=Gdx.graphics.getHeight()/Box2D_Setting.PPM;
 	public static float max_width;
 	public static float max_height;
-	private static float camera_x=Window_width/2;
-	private static float camera_y=Window_height/2;
-	
+	public static float camera_x=Window_width/2;
+	public static float camera_y=Window_height/2;
+	private static float scale_x=1;
+	private static float scale_y=1;
 	
 	public static void reset(){
+		 Window_width=Gdx.graphics.getWidth()/Box2D_Setting.PPM;;
+		 Window_height=Gdx.graphics.getHeight()/Box2D_Setting.PPM;
 		 camera_x=Window_width/2;
 	     camera_y=Window_height/2;
+	     scale_x=1;
+	     scale_y=1;
+	     
+	}
+	public static void set_scale_xy(float x,float y){
+			 scale_x=x;
+			 scale_y=y;
+			 camera_x/=x;
+			 Window_width/=x;
+			 camera_y/=y;
+			 Window_height/=y;
 	}
  
 	public static void set_map(int grid_width,int grid_height,int w,int h){
@@ -26,11 +40,14 @@ public class Map_Info {
 		float height=(grid_height*h)/Box2D_Setting.PPM;
 		max_height=height;
 		max_width=width;
+		
+	
 	}
 	
 	public static Vector2 center(Body body){
          Vector2 p= body.getPosition();
 		   
+        
 		   float dx=Map_Info.camera_x-p.x;
 		   float dy=Map_Info.camera_y-p.y;
 		   float half_w_w=( Window_width/2);
